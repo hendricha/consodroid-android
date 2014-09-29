@@ -1,12 +1,22 @@
 package hu.hendricha.consodroid;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -23,6 +33,21 @@ public class Consodroid extends Activity {
         Log.d("ConsoDroid", "minden előtt");
         TextView ipValue = (TextView)findViewById(R.id.ip_value);
         ipValue.setText(IpUtil.getIdealIPAddress());
+
+        this.copyAsset(this.getFilesDir(), "node");
+        try {
+            Process nativeApp = Runtime.getRuntime().exec("/system/bin/chmod 744 /data/data/hu.hendricha.consodroid/files/node/node");
+            nativeApp.waitFor();
+
+            nativeApp = Runtime.getRuntime().exec("/data/data/hu.hendricha.consodroid/files/node/node subdir/hello.js", new String[0], new File("/data/data/hu.hendricha.consodroid/files/node"));
+           // nativeApp.waitFor();
+
+            Log.d("Consodroid", "Started node");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -45,4 +70,114 @@ public class Consodroid extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void copyAssets(String path) {
+        AssetManager assetManager = getApplicationContext().getAssets();
+        String[] files = null;
+        try {
+            files = assetManager.list(path);
+        } catch (IOException e) {
+            Log.e("ConsoDroid", "Failed to get asset file list.", e);
+        }
+
+        String outPath = Environment.getDataDirectory().getAbsolutePath() + "/data/installed-consodroid/" ;
+        for(String filename : files) {
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = assetManager.open("node/" + filename);
+
+                //File outFile = new File(outPath, filename);
+                //out = new FileOutputStream(outFile);
+                out = openFileOutput(filename, Context.MODE_WORLD_WRITEABLE);
+
+
+                copyFile(in, out);
+
+                in.close();
+                in = null;
+
+                out.flush();
+                out.close();
+                out = null;
+                Log.d("ConsoDroid", "Wrote out " + filename);
+            } catch(IOException e) {
+                Log.e("ConsoDroid", "Failed to copy asset file: " + filename, e);
+            }
+        }
+        Log.d("ConsoDroid", "asset install done");
+    }
+    private static void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while((read = in.read(buffer)) != -1){
+            out.write(buffer, 0, read);
+        }
+    }
+
+    /**
+     * Copy the asset at the specified path to this app's data directory. If the
+     * asset is a directory, its contents are also copied.
+     *
+     * @param path
+     * Path to asset, relative to app's assets directory.
+     */
+    private void copyAsset(File parentDir, String path) {
+        Log.d("ConsoDroid", "Copying asset: " + parentDir.getAbsolutePath() + "  /  " + path);
+        AssetManager manager = getAssets();
+
+        // If we have a directory, we make it and recurse. If a file, we copy its
+        // contents.
+        try {
+            String asset = parentDir.getAbsolutePath().replace(getFilesDir().getAbsolutePath(), "") + "/" + path;
+            String[] contents = manager.list(asset.charAt(0) == '/' ? asset.substring(1) : asset);
+
+            // The documentation suggests that list throws an IOException, but doesn't
+            // say under what conditions. It'd be nice if it did so when the path was
+            // to a file. That doesn't appear to be the case. If the returned array is
+            // null or has 0 length, we assume the path is to a file. This means empty
+            // directories will get turned into files.
+            if (contents == null || contents.length == 0)
+                throw new IOException();
+
+            // Make the directory.
+            File dir = new File(parentDir, path);
+            dir.mkdirs();
+
+            // Recurse on the contents.
+            for (String entry : contents) {
+                copyAsset(dir, entry);
+            }
+        } catch (IOException e) {
+            copyFileAsset(parentDir, path);
+        }
+    }
+
+    /**
+     * Copy the asset file specified by path to app's data directory. Assumes
+     * parent directories have already been created.
+     *
+     * @param path
+     * Path to asset, relative to app's assets directory.
+     */
+    private void copyFileAsset(File parentDir, String path) {
+        Log.d("ConsoDroid", "Copying file: " + parentDir.getAbsolutePath() + "  /  " + path);
+        File file = new File(parentDir, path);
+
+        try {
+            String asset = parentDir.getAbsolutePath().replace(getFilesDir().getAbsolutePath(), "") + "/" + path;
+            InputStream in = getAssets().open(asset.charAt(0) == '/' ? asset.substring(1) : asset);
+            OutputStream out = new FileOutputStream(file);
+            byte[] buffer = new byte[1024];
+            int read = in.read(buffer);
+            while (read != -1) {
+                out.write(buffer, 0, read);
+                read = in.read(buffer);
+            }
+            out.close();
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("Consodroid", e.getMessage());
+        }
+    }
 }

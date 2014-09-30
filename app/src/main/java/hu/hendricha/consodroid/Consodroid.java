@@ -1,27 +1,18 @@
 package hu.hendricha.consodroid;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
 
 public class Consodroid extends Activity {
 
@@ -68,50 +59,6 @@ public class Consodroid extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void copyAssets(String path) {
-        AssetManager assetManager = getApplicationContext().getAssets();
-        String[] files = null;
-        try {
-            files = assetManager.list(path);
-        } catch (IOException e) {
-            Log.e("ConsoDroid", "Failed to get asset file list.", e);
-        }
-
-        String outPath = Environment.getDataDirectory().getAbsolutePath() + "/data/installed-consodroid/" ;
-        for(String filename : files) {
-            InputStream in = null;
-            OutputStream out = null;
-            try {
-                in = assetManager.open("node/" + filename);
-
-                //File outFile = new File(outPath, filename);
-                //out = new FileOutputStream(outFile);
-                out = openFileOutput(filename, Context.MODE_WORLD_WRITEABLE);
-
-
-                copyFile(in, out);
-
-                in.close();
-                in = null;
-
-                out.flush();
-                out.close();
-                out = null;
-                Log.d("ConsoDroid", "Wrote out " + filename);
-            } catch(IOException e) {
-                Log.e("ConsoDroid", "Failed to copy asset file: " + filename, e);
-            }
-        }
-        Log.d("ConsoDroid", "asset install done");
-    }
-    private static void copyFile(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        int read;
-        while((read = in.read(buffer)) != -1){
-            out.write(buffer, 0, read);
-        }
     }
 
     /**

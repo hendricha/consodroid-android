@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">Consodroid</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="license_line_3">Icon is based on <a href="https://www.iconfinder.com/megavyto98">Vicent Pla\'s Simply 8-bits icons</a></string>
 
 </resources>

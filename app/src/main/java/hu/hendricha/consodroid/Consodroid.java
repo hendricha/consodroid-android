@@ -1,9 +1,11 @@
 package hu.hendricha.consodroid;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -109,14 +111,21 @@ public class Consodroid extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_about) {
+            openAboutDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void openAboutDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_about);
+        dialog.setTitle("About ConsoDroid");
+        TextView textView = (TextView)dialog.findViewById(R.id.license_line_3);
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        dialog.show();
     }
 
     /**

@@ -1,17 +1,22 @@
 package hu.hendricha.consodroid;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 public class Consodroid extends Activity {
@@ -25,8 +30,8 @@ public class Consodroid extends Activity {
         TextView ipValue = (TextView)findViewById(R.id.ip_value);
         ipValue.setText(IpUtil.getIdealIPAddress());
 
-        this.copyAsset(this.getFilesDir(), "node");
-        try {
+
+        /*try {
             Process nativeApp = Runtime.getRuntime().exec("/system/bin/chmod 744 /data/data/hu.hendricha.consodroid/files/node/node");
             nativeApp.waitFor();
 
@@ -38,9 +43,69 @@ public class Consodroid extends Activity {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }*/
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.d("ConsoDroid", "onResume");
+        if (this.requiresAssetIstall()) {
+            Log.d("ConsoDroid", "Assets need to be installed");
+            launchRingDialog();
+        } else {
+            Log.d("ConsoDroid", "Assets do not need to be installed");
         }
     }
 
+    private boolean requiresAssetIstall() {
+        File file = new File(this.getFilesDir(), "node/version");
+        if (!file.exists()) {
+            return true;
+        }
+
+        AssetManager manager = getAssets();
+        try {
+            InputStream versionFile = manager.open("node/version");
+            InputStream installedVersionFile = new FileInputStream(file);
+            String version = readFile(versionFile);
+            String installedVersion = readFile(installedVersionFile);
+            if (!version.equals(installedVersion)) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    private String readFile(InputStream fileStream) throws IOException {
+        BufferedReader r = new BufferedReader(new InputStreamReader(fileStream));
+        StringBuilder total = new StringBuilder();
+        String line;
+        while ((line = r.readLine()) != null) {
+            total.append(line);
+        }
+        return total.toString();
+    }
+
+    public void launchRingDialog() {
+        final ProgressDialog ringProgressDialog = ProgressDialog.show(this, "Please wait ...", "Installing assets ...", true);
+        ringProgressDialog.setCancelable(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                        copyAsset(getFilesDir(), "node");
+                    } catch (Exception e) {
+
+                    }
+                ringProgressDialog.dismiss();
+            }
+        }).start();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

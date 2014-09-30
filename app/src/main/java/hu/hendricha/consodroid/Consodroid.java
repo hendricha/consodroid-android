@@ -1,10 +1,14 @@
 package hu.hendricha.consodroid;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.FileObserver;
+import android.os.Looper;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -21,10 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 public class Consodroid extends Activity {
 
     private Process nodeProcess;
+    private FileObserver accessControlObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +52,8 @@ public class Consodroid extends Activity {
 
         TextView ipValue = (TextView)findViewById(R.id.ip_value);
         ipValue.setText(IpUtil.getIdealIPAddress());
+
+        createAccessControlObserver();
     }
 
     private boolean requiresAssetIstall() {
@@ -100,6 +108,52 @@ public class Consodroid extends Activity {
                 ringProgressDialog.dismiss();
             }
         }).start();
+    }
+
+    private void createAccessControlObserver() {
+        final File dir = new File(this.getFilesDir(), "accessControl");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        accessControlObserver = new FileObserver("/data/data/hu.hendricha.consodroid/files/accessControl") {
+            @Override
+            public void onEvent(int event, final String fileName) {
+                Log.d("ConsoDroid", "FileObserver event: " + fileName);
+
+                if(event == FileObserver.CREATE){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
+                    Log.d("ConsoDroid", "Found new access control file: " + fileName);
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            new AlertDialog.Builder(Consodroid.this)
+                                .setTitle("New connection")
+                                .setMessage("Do you allow " + fileName + " access to all folders?")
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        try {
+                                            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(new File(dir, fileName)));
+                                            outputStreamWriter.write("true");
+                                            outputStreamWriter.close();
+                                            Log.d("ConsoDroid", "Gave access to: " + fileName);
+                                        }
+                                        catch (IOException e) {
+                                            Log.e("Exception", "File write failed: " + e.toString());
+                                        }
+                                    }})
+                                .setNegativeButton(android.R.string.no, null).show();
+                        }
+                    });
+                }
+            }
+        };
+        accessControlObserver.startWatching();
+    }
+
+    @Override
+    protected void onPause() {
+        accessControlObserver.stopWatching();
+        super.onPause();
     }
 
     @Override

@@ -16,7 +16,20 @@
     <TextView
         android:id="@+id/ip_value"
         android:layout_below="@id/ip_title"
-        android:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/onsodroid_switch_title"
+        android:text="ConsoDroid is not running:"
+        android:layout_below="@id/ip_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <Switch
+        android:id="@+id/consodroid_switch"
+        android:layout_below="@id/ip_value"
+        android:layout_toRightOf="@id/onsodroid_switch_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSwitchClicked"/>
 </RelativeLayout>

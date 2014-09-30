@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -21,29 +22,12 @@ import java.io.OutputStream;
 
 public class Consodroid extends Activity {
 
+    private Process nodeProcess;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_consodroid);
-
-        Log.d("ConsoDroid", "minden előtt");
-        TextView ipValue = (TextView)findViewById(R.id.ip_value);
-        ipValue.setText(IpUtil.getIdealIPAddress());
-
-
-        /*try {
-            Process nativeApp = Runtime.getRuntime().exec("/system/bin/chmod 744 /data/data/hu.hendricha.consodroid/files/node/node");
-            nativeApp.waitFor();
-
-            nativeApp = Runtime.getRuntime().exec("/data/data/hu.hendricha.consodroid/files/node/node subdir/hello.js", new String[0], new File("/data/data/hu.hendricha.consodroid/files/node"));
-           // nativeApp.waitFor();
-
-            Log.d("Consodroid", "Started node");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }*/
     }
 
     @Override
@@ -57,6 +41,9 @@ public class Consodroid extends Activity {
         } else {
             Log.d("ConsoDroid", "Assets do not need to be installed");
         }
+
+        TextView ipValue = (TextView)findViewById(R.id.ip_value);
+        ipValue.setText(IpUtil.getIdealIPAddress());
     }
 
     private boolean requiresAssetIstall() {
@@ -97,11 +84,17 @@ public class Consodroid extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                copyAsset(getFilesDir(), "node");
+                Process nativeApp = null;
                 try {
-                        copyAsset(getFilesDir(), "node");
-                    } catch (Exception e) {
+                    nativeApp = Runtime.getRuntime().exec("/system/bin/chmod 744 /data/data/hu.hendricha.consodroid/files/node/node");
+                    nativeApp.waitFor();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                    }
                 ringProgressDialog.dismiss();
             }
         }).start();
@@ -189,7 +182,26 @@ public class Consodroid extends Activity {
             in.close();
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e("Consodroid", e.getMessage());
+            Log.e("ConsoDroid", e.getMessage());
+        }
+    }
+
+    public void onSwitchClicked(View view) {
+        // Is the toggle on?
+        boolean on = ((Switch) view).isChecked();
+
+        if (on) {
+            try {
+                nodeProcess = Runtime.getRuntime().exec("/data/data/hu.hendricha.consodroid/files/node/node subdir/hello.js", new String[0], new File("/data/data/hu.hendricha.consodroid/files/node"));
+                Log.d("Consodroid", "Started node");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            if (nodeProcess != null) {
+                nodeProcess.destroy();
+                Log.d("ConsoDroid", "Stopped node");
+            }
         }
     }
 }

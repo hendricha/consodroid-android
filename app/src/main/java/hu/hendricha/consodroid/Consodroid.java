@@ -31,6 +31,8 @@ public class Consodroid extends Activity {
 
     private Process nodeProcess;
     private FileObserver accessControlObserver;
+    private ProgressDialog ringProgressDialog = null;
+    int assetNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +47,7 @@ public class Consodroid extends Activity {
         Log.d("ConsoDroid", "onResume");
         if (this.requiresAssetIstall()) {
             Log.d("ConsoDroid", "Assets need to be installed");
-            launchRingDialog();
+            launchCopyAssetDialog();
         } else {
             Log.d("ConsoDroid", "Assets do not need to be installed");
         }
@@ -88,9 +90,14 @@ public class Consodroid extends Activity {
         return total.toString();
     }
 
-    public void launchRingDialog() {
-        final ProgressDialog ringProgressDialog = ProgressDialog.show(this, "Please wait ...", "Installing assets ...", true);
-        ringProgressDialog.setCancelable(true);
+    public void launchCopyAssetDialog() {
+        if (ringProgressDialog != null) {
+            Log.e("ConsoDroid", "There was already a copy asset dialog open.");
+            return;
+        }
+        ringProgressDialog = ProgressDialog.show(this, "Please wait, installing assets...", "Installing assets ...", true);
+        ringProgressDialog.setCancelable(false);
+        ringProgressDialog.setCanceledOnTouchOutside(false);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -106,6 +113,7 @@ public class Consodroid extends Activity {
                 }
 
                 ringProgressDialog.dismiss();
+                ringProgressDialog = null;
             }
         }).start();
     }
@@ -190,7 +198,14 @@ public class Consodroid extends Activity {
      * Path to asset, relative to app's assets directory.
      */
     private void copyAsset(File parentDir, String path) {
-        Log.d("ConsoDroid", "Copying asset: " + parentDir.getAbsolutePath() + "  /  " + path);
+        final String msg = "Copying asset #" + (++assetNumber) +  ": " + parentDir.getAbsolutePath() + " / " + path;
+        Log.d("ConsoDroid", msg);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ringProgressDialog.setMessage(msg);
+            }
+        });
         AssetManager manager = getAssets();
 
         // If we have a directory, we make it and recurse. If a file, we copy its

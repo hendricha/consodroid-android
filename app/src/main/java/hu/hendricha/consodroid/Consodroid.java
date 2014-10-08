@@ -7,8 +7,11 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Looper;
+import android.os.storage.OnObbStateChangeListener;
+import android.os.storage.StorageManager;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -33,6 +36,14 @@ public class Consodroid extends Activity {
     private FileObserver accessControlObserver;
     private ProgressDialog ringProgressDialog = null;
     int assetNumber = 0;
+    private String mountedObbPath = "";
+    OnObbStateChangeListener obbStateChangeListener = new OnObbStateChangeListener() {
+        @Override
+        public void onObbStateChange(final String path, int state) {
+            super.onObbStateChange(path, state);
+            Log.d("ConsoDroid", "OBB state change: path: " + path + "; state: " + state);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +61,7 @@ public class Consodroid extends Activity {
             launchCopyAssetDialog();
         } else {
             Log.d("ConsoDroid", "Assets do not need to be installed");
+            mountObb();
         }
 
         TextView ipValue = (TextView)findViewById(R.id.ip_value);
@@ -59,14 +71,14 @@ public class Consodroid extends Activity {
     }
 
     private boolean requiresAssetIstall() {
-        File file = new File(this.getFilesDir(), "node/version");
+        File file = new File(Environment.getExternalStorageDirectory(), "/Android/obb/hu.hendricha.consodroid/version");
         if (!file.exists()) {
             return true;
         }
 
         AssetManager manager = getAssets();
         try {
-            InputStream versionFile = manager.open("node/version");
+            InputStream versionFile = manager.open("version");
             InputStream installedVersionFile = new FileInputStream(file);
             String version = readFile(versionFile);
             String installedVersion = readFile(installedVersionFile);
@@ -101,21 +113,66 @@ public class Consodroid extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                copyAsset(getFilesDir(), "node");
-                Process nativeApp = null;
-                try {
-                    nativeApp = Runtime.getRuntime().exec("/system/bin/chmod 744 /data/data/hu.hendricha.consodroid/files/node/node");
-                    nativeApp.waitFor();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                unmountObb();
+                File obbDirectory = new File(Environment.getExternalStorageDirectory(), "/Android/obb/hu.hendricha.consodroid");
+                copyFileAsset(obbDirectory, "version");
+                copyFileAsset(obbDirectory, "consodroid.obb");
+                mountObb();
 
                 ringProgressDialog.dismiss();
                 ringProgressDialog = null;
             }
         }).start();
+    }
+
+    private void mountObb() {
+        final StorageManager storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
+        String obbPath = Environment.getExternalStorageDirectory() + "/Android/obb";
+        final String obbFilePath = obbPath + "/hu.hendricha.consodroid/consodroid.obb";
+
+        if (storageManager.isObbMounted(obbFilePath)) {
+            setObbPath(storageManager.getMountedObbPath(obbFilePath));
+            Log.d("ConsoDroid", "obb is already mounted to " + mountedObbPath);
+            return;
+        }
+
+        Log.d("ConsoDroid", "obb: will now atempt to mount " + obbFilePath);
+
+        storageManager.mountObb(obbFilePath, null, obbStateChangeListener);
+
+        try {
+            while (!storageManager.isObbMounted(obbFilePath)) {
+                Thread.sleep(500);
+                Log.d("ConsoDroid", "obb is still not mounted");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        setObbPath(storageManager.getMountedObbPath(obbFilePath));
+        Log.d("ConsoDroid", "obb is now mounted to " + mountedObbPath);
+    }
+
+    public void setObbPath(String path) {
+        mountedObbPath = path;
+    }
+
+    public void unmountObb() {
+        final StorageManager storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
+        String obbPath = Environment.getExternalStorageDirectory() + "/Android/obb";
+        final String obbFilePath = obbPath + "/hu.hendricha.consodroid/consodroid.obb";
+
+        if (storageManager.isObbMounted(obbFilePath)) {
+            OnObbStateChangeListener listener = new OnObbStateChangeListener() {
+                @Override
+                public void onObbStateChange(final String path, int state) {
+                    super.onObbStateChange(path, state);
+                    Log.d("ConsoDroidOBB", "State change: path: " + path + "; state: " + state);
+                }
+            };
+
+            storageManager.unmountObb(obbFilePath, true, listener);
+        }
     }
 
     private void createAccessControlObserver() {
@@ -166,7 +223,6 @@ public class Consodroid extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.consodroid, menu);
         return true;
     }
@@ -191,51 +247,6 @@ public class Consodroid extends Activity {
     }
 
     /**
-     * Copy the asset at the specified path to this app's data directory. If the
-     * asset is a directory, its contents are also copied.
-     *
-     * @param path
-     * Path to asset, relative to app's assets directory.
-     */
-    private void copyAsset(File parentDir, String path) {
-        final String msg = "Copying asset #" + (++assetNumber) +  ": " + parentDir.getAbsolutePath() + " / " + path;
-        Log.d("ConsoDroid", msg);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ringProgressDialog.setMessage(msg);
-            }
-        });
-        AssetManager manager = getAssets();
-
-        // If we have a directory, we make it and recurse. If a file, we copy its
-        // contents.
-        try {
-            String asset = parentDir.getAbsolutePath().replace(getFilesDir().getAbsolutePath(), "") + "/" + path;
-            String[] contents = manager.list(asset.charAt(0) == '/' ? asset.substring(1) : asset);
-
-            // The documentation suggests that list throws an IOException, but doesn't
-            // say under what conditions. It'd be nice if it did so when the path was
-            // to a file. That doesn't appear to be the case. If the returned array is
-            // null or has 0 length, we assume the path is to a file. This means empty
-            // directories will get turned into files.
-            if (contents == null || contents.length == 0)
-                throw new IOException();
-
-            // Make the directory.
-            File dir = new File(parentDir, path);
-            dir.mkdirs();
-
-            // Recurse on the contents.
-            for (String entry : contents) {
-                copyAsset(dir, entry);
-            }
-        } catch (IOException e) {
-            copyFileAsset(parentDir, path);
-        }
-    }
-
-    /**
      * Copy the asset file specified by path to app's data directory. Assumes
      * parent directories have already been created.
      *
@@ -247,7 +258,7 @@ public class Consodroid extends Activity {
         File file = new File(parentDir, path);
 
         try {
-            String asset = parentDir.getAbsolutePath().replace(getFilesDir().getAbsolutePath(), "") + "/" + path;
+            String asset = parentDir.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/obb/hu.hendricha.consodroid", "") + "/" + path;
             InputStream in = getAssets().open(asset.charAt(0) == '/' ? asset.substring(1) : asset);
             OutputStream out = new FileOutputStream(file);
             byte[] buffer = new byte[1024];
@@ -264,13 +275,18 @@ public class Consodroid extends Activity {
         }
     }
 
+    /**
+     * Switch click listener, starts/stops node instance on toggle
+     *
+     * @param view
+     * The switch
+     */
     public void onSwitchClicked(View view) {
-        // Is the toggle on?
         boolean on = ((Switch) view).isChecked();
 
         if (on) {
             try {
-                nodeProcess = Runtime.getRuntime().exec("/data/data/hu.hendricha.consodroid/files/node/node subdir/hello.js", new String[0], new File("/data/data/hu.hendricha.consodroid/files/node"));
+                nodeProcess = Runtime.getRuntime().exec(mountedObbPath + "/node run.js", new String[0], new File(mountedObbPath));
                 Log.d("Consodroid", "Started node");
             } catch (IOException e) {
                 throw new RuntimeException(e);

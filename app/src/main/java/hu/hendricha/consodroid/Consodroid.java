@@ -58,6 +58,8 @@ public class Consodroid extends Activity {
         super.onResume();
 
         Log.d("ConsoDroid", "onResume");
+        deleteAccessControlFiles();
+
         if (this.requiresAssetIstall()) {
             Log.d("ConsoDroid", "Assets need to be installed");
             launchCopyAssetDialog();
@@ -70,6 +72,19 @@ public class Consodroid extends Activity {
         updateIpAddress();
 
         createAccessControlObserver();
+    }
+
+    private void deleteAccessControlFiles() {
+        File file = new File(this.getFilesDir(), "accessControl");
+        String[] myFiles;
+
+        myFiles = file.list();
+        if (myFiles.length > 0) {
+            Log.d("ConsoDroid", "Removing old access control files");
+        }
+        for (int i=0; i<myFiles.length; i++) {
+            new File(file, myFiles[i]).delete();
+        }
     }
 
     private boolean requiresAssetIstall() {

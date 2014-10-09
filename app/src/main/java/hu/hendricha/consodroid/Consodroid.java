@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -65,6 +66,7 @@ public class Consodroid extends Activity {
             mountObb();
         }
 
+        createNetworkChangeReciever();
         updateIpAddress();
 
         createAccessControlObserver();
@@ -176,6 +178,15 @@ public class Consodroid extends Activity {
 
             storageManager.unmountObb(obbFilePath, true, listener);
         }
+    }
+
+    private void createNetworkChangeReciever() {
+        Log.d("ConsoDroid", "Registering network change reciver");
+        NetworkStateReceiver receiver = null;
+        receiver = new NetworkStateReceiver();
+        receiver.setMainActivityHandler(this);
+        IntentFilter intent = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(receiver, intent);
     }
 
     public void updateIpAddress() {

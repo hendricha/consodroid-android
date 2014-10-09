@@ -35,15 +35,16 @@ public class Consodroid extends Activity {
     private Process nodeProcess;
     private FileObserver accessControlObserver;
     private ProgressDialog ringProgressDialog = null;
-    int assetNumber = 0;
+    private int assetNumber = 0;
     private String mountedObbPath = "";
-    OnObbStateChangeListener obbStateChangeListener = new OnObbStateChangeListener() {
+    private OnObbStateChangeListener obbStateChangeListener = new OnObbStateChangeListener() {
         @Override
         public void onObbStateChange(final String path, int state) {
             super.onObbStateChange(path, state);
             Log.d("ConsoDroid", "OBB state change: path: " + path + "; state: " + state);
         }
     };
+    private String obbPathOnExternalStorage = "/Android/obb/hu.hendricha.consodroid";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,14 +65,13 @@ public class Consodroid extends Activity {
             mountObb();
         }
 
-        TextView ipValue = (TextView)findViewById(R.id.ip_value);
-        ipValue.setText(IpUtil.getIdealIPAddress());
+        updateIpAddress();
 
         createAccessControlObserver();
     }
 
     private boolean requiresAssetIstall() {
-        File file = new File(Environment.getExternalStorageDirectory(), "/Android/obb/hu.hendricha.consodroid/version");
+        File file = new File(Environment.getExternalStorageDirectory(), obbPathOnExternalStorage + "/version");
         if (!file.exists()) {
             return true;
         }
@@ -114,7 +114,10 @@ public class Consodroid extends Activity {
             @Override
             public void run() {
                 unmountObb();
-                File obbDirectory = new File(Environment.getExternalStorageDirectory(), "/Android/obb/hu.hendricha.consodroid");
+                File obbDirectory = new File(Environment.getExternalStorageDirectory(), obbPathOnExternalStorage);
+                if (!obbDirectory.exists()) {
+                    obbDirectory.mkdirs();
+                }
                 copyFileAsset(obbDirectory, "version");
                 copyFileAsset(obbDirectory, "consodroid.obb");
                 mountObb();
@@ -175,6 +178,16 @@ public class Consodroid extends Activity {
         }
     }
 
+    public void updateIpAddress() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView ipValue = (TextView)findViewById(R.id.ip_value);
+                ipValue.setText(IpUtil.getIdealIPAddress());
+            }
+        });
+    }
+
     private void createAccessControlObserver() {
         final File dir = new File(this.getFilesDir(), "accessControl");
         if (!dir.exists()) {
@@ -218,6 +231,9 @@ public class Consodroid extends Activity {
     @Override
     protected void onPause() {
         accessControlObserver.stopWatching();
+        if (nodeProcess != null) {
+            nodeProcess.destroy();
+        }
         super.onPause();
     }
 
@@ -258,7 +274,7 @@ public class Consodroid extends Activity {
         File file = new File(parentDir, path);
 
         try {
-            String asset = parentDir.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/obb/hu.hendricha.consodroid", "") + "/" + path;
+            String asset = parentDir.getAbsolutePath().replace(Environment.getExternalStorageDirectory().getAbsolutePath() + obbPathOnExternalStorage, "") + "/" + path;
             InputStream in = getAssets().open(asset.charAt(0) == '/' ? asset.substring(1) : asset);
             OutputStream out = new FileOutputStream(file);
             byte[] buffer = new byte[1024];
@@ -281,13 +297,37 @@ public class Consodroid extends Activity {
      * @param view
      * The switch
      */
-    public void onSwitchClicked(View view) {
+    public void onSwitchClicked(final View view) {
         boolean on = ((Switch) view).isChecked();
+        final TextView title = (TextView)findViewById(R.id.consodroid_switch_title);
 
         if (on) {
             try {
                 nodeProcess = Runtime.getRuntime().exec(mountedObbPath + "/node run.js", new String[0], new File(mountedObbPath));
                 Log.d("Consodroid", "Started node");
+                title.setText("ConsoDroid is running:");
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("Consodroid", "Waiting for node exit on a seperate thread");
+                        try {
+                            nodeProcess.waitFor();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Log.d("ConsoDroid", "node exited");
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((Switch) view).setChecked(false);
+                                title.setText("ConsoDroid is not running:");
+                            }
+                        });
+
+                    }
+                }).start();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

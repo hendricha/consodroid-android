@@ -10,7 +10,6 @@ import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileObserver;
-import android.os.Looper;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageManager;
 import android.text.method.LinkMovementMethod;

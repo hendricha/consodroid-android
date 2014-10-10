@@ -32,6 +32,8 @@ rm -rf node_modules/contextify
 cd node_modules
 git clone https://github.com/hendricha/contextify.git
 rm -rf contextify/.git
+cd contextify
+npm install nan bindings
 
 cd $TEMPORARY
 
@@ -48,14 +50,16 @@ cd node-$NODEVERSION
 sed 's/4.7/4.8/g' android-configure > android-configure4.8
 chmod +x android-configure4.8
 . ./android-configure4.8 $NDKDIR
+export PATH=/usr/bin:$PATH
 make
 
 cd $TEMPORARY/consoloid-consodroid/node_modules/contextify
-npm install binding nan
 cd build
 make
-cp $TEMPORARY/node-$NODEVERSION/node $TEMPORARY/consoloid-consodroid
+cp $TEMPORARY/node-$NODEVERSION/out/Release/node $TEMPORARY/consoloid-consodroid
 
+cd $TEMPORARY/consoloid-consodroid/
+rm -f $CONSODROIDANDROIDDIR/app/src/main/assets/consodroid.obb
 $JOBB -d . -o $CONSODROIDANDROIDDIR/app/src/main/assets/consodroid.obb -pn hu.hendricha.consodroid -pv 1
 echo $RANDOM > $CONSODROIDANDROIDDIR/app/src/main/assets/version
 

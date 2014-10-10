@@ -259,6 +259,7 @@ public class Consodroid extends Activity {
         if (nodeProcess != null) {
             nodeProcess.destroy();
         }
+        unmountObb();
         super.onPause();
     }
 

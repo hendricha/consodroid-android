@@ -78,9 +78,11 @@ public class Consodroid extends Activity {
         String[] myFiles;
 
         myFiles = file.list();
-        if (myFiles.length > 0) {
-            Log.d("ConsoDroid", "Removing old access control files");
+        if (myFiles == null) {
+            return;
         }
+
+        Log.d("ConsoDroid", "Removing old access control files");
         for (int i=0; i<myFiles.length; i++) {
             new File(file, myFiles[i]).delete();
         }

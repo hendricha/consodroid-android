@@ -331,7 +331,7 @@ public class Consodroid extends Activity {
 
         if (on) {
             try {
-                nodeProcess = Runtime.getRuntime().exec(mountedObbPath + "/node run.js", new String[0], new File(mountedObbPath));
+                nodeProcess = Runtime.getRuntime().exec(mountedObbPath + "/node run.js prod", new String[0], new File(mountedObbPath));
                 Log.d("Consodroid", "Started node");
                 title.setText("ConsoDroid is running:");
 

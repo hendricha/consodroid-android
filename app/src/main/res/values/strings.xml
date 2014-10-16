@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Consodroid</string>
-    <string name="license_line_3">Icon is based on <a href="https://www.iconfinder.com/megavyto98">Vicent Pla\'s Simply 8-bits icons</a></string>
+    <string name="app_name">ConsoDroid</string>
+    <string name="license_line_icon">Icon is based on <a href="https://www.iconfinder.com/megavyto98">Vicent Pla\'s Simply 8-bits icons</a></string>
     <string name="visit">Visit:</string>
     <string name="not_running">ConsoDroid is not running</string>
     <string name="please_wait">Please wait</string>
     <string name="installing_assets">Installing assets ...</string>
     <string name="new_connection">New connection</string>
     <string name="allow_x">Do you allow %s access to all folders?</string>
-    <string name="about_title">About ConsoDroid</string>
+    <string name="about_title">About</string>
     <string name="running">ConsoDroid is running</string>
+    <string name="license_line">Created by Hendrich Attila at agmen.hu\nConsoDroid is licensed under MIT license\nConsoloid is licensed under MIT license\nNode.js is licensed under MIT license\nMobile and Wifi icon from FontAwesome pac, licensed under MIT license</string>
+    <string name="about_subtitle">Browse and share your files through HTTP</string>
 
 </resources>

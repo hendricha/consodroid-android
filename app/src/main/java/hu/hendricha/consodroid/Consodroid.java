@@ -299,7 +299,7 @@ public class Consodroid extends Activity {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_about);
         dialog.setTitle(getString(R.string.about_title));
-        TextView textView = (TextView)dialog.findViewById(R.id.license_line_3);
+        TextView textView = (TextView)dialog.findViewById(R.id.license_line_icon);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
         dialog.show();
     }

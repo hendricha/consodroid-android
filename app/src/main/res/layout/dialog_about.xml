@@ -2,32 +2,63 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <ImageView
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/ic_launcher"
+        android:layout_weight="0.15" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/app_name"
+        android:id="@+id/textView2"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/about_subtitle"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:id="@+id/about_subtitle"
+        android:gravity="center_horizontal"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="https://github.com/hendricha/consodroid-android"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:id="@+id/about_webpage"
+        android:gravity="center_horizontal"
+        android:layout_weight="0.15"
+        android:autoLink="web"
+        />
 
     <TextView
         android:id="@+id/created_by_line"
-        android:text="Created by Hendrich Attila at agmen.hu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:text="@string/license_line"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:lineSpacingExtra="5dp"
+        />
     <TextView
-        android:id="@+id/license_line_0"
-        android:text="ConsoDroid is licensed under MIT license"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/license_line_1"
-        android:text="Consoloid is licensed under MIT license"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/license_line_2"
-        android:text="Node.js is licensed under MIT license"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/license_line_3"
+        android:id="@+id/license_line_icon"
         android:linksClickable="true"
-        android:text="@string/license_line_3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:text="@string/license_line_icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
+
 </LinearLayout>

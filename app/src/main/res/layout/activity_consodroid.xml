@@ -6,30 +6,80 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".Consodroid">
+    tools:context=".Consodroid"
+    android:background="@drawable/background">
 
     <TextView
         android:id="@+id/ip_title"
-        android:text="Ip address:"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Visit:"
+        android:layout_below="@+id/consodroid_switch"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:textSize="26dp"
+        android:fontFamily="sans-serif-condensed" />
+
     <TextView
         android:id="@+id/ip_value"
-        android:layout_below="@id/ip_title"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="https://555.555.555.555:3000"
+        android:layout_below="@+id/ip_title"
+        android:layout_centerHorizontal="true"
+        android:textSize="22dp"
+        android:fontFamily="sans-serif-condensed"
+        android:background="@drawable/url_background"/>
 
     <TextView
         android:id="@+id/consodroid_switch_title"
         android:text="ConsoDroid is not running:"
-        android:layout_below="@id/ip_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <Switch
-        android:id="@+id/consodroid_switch"
-        android:layout_below="@id/ip_value"
-        android:layout_toRightOf="@id/consodroid_switch_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onSwitchClicked"/>
+        android:layout_above="@+id/consodroid_switch"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="26dp"
+
+        android:shadowColor="#000"
+        android:shadowDx="0.0"
+        android:shadowDy="0.0"
+        android:shadowRadius="10"
+
+        android:textColor="#fff" />
+    <Switch
+        android:id="@+id/consodroid_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:thumb="@drawable/custom_switch_inner"
+        android:track="@drawable/custom_switch_track"
+        android:textOn="on"
+        android:textOff="off"
+        android:switchTextAppearance="@style/SwitchTextAppearance"
+        android:onClick="onSwitchClicked"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:height="45dp"
+        android:width="100dp"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView3"
+        android:src="@drawable/fa_mobile"
+        android:layout_above="@+id/consodroid_switch_title"
+        android:layout_alignRight="@+id/consodroid_switch_title"
+        android:layout_alignEnd="@+id/consodroid_switch_title"
+        android:layout_alignLeft="@+id/consodroid_switch_title"
+        android:layout_alignStart="@+id/consodroid_switch_title"
+        android:layout_below="@+id/imageView" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/fa_wifi" />
 </RelativeLayout>

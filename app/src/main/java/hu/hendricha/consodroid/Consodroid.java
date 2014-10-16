@@ -68,6 +68,7 @@ public class Consodroid extends Activity {
             mountObb();
         }
 
+        createPublicFolder();
         createNetworkChangeReciever();
         updateIpAddress();
 
@@ -194,6 +195,14 @@ public class Consodroid extends Activity {
             };
 
             storageManager.unmountObb(obbFilePath, true, listener);
+        }
+    }
+
+    private void createPublicFolder() {
+        final File dir = new File(Environment.getExternalStorageDirectory(), "ConsoDroidPublic");
+        if (!dir.exists()) {
+            Log.d("ConsoDroid", "Created public folder");
+            dir.mkdirs();
         }
     }
 

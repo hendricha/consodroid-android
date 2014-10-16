@@ -126,7 +126,7 @@ public class Consodroid extends Activity {
             Log.e("ConsoDroid", "There was already a copy asset dialog open.");
             return;
         }
-        ringProgressDialog = ProgressDialog.show(this, "Please wait, installing assets...", "Installing assets ...", true);
+        ringProgressDialog = ProgressDialog.show(this, getString(R.string.please_wait), getString(R.string.installing_assets), true);
         ringProgressDialog.setCancelable(false);
         ringProgressDialog.setCanceledOnTouchOutside(false);
         new Thread(new Runnable() {
@@ -240,13 +240,13 @@ public class Consodroid extends Activity {
             public void onEvent(int event, final String fileName) {
                 Log.d("ConsoDroid", "FileObserver event: " + fileName);
 
-                if(event == FileObserver.CREATE){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
+                if(event == FileObserver.CREATE){
                     Log.d("ConsoDroid", "Found new access control file: " + fileName);
                     runOnUiThread(new Runnable() {
                         public void run() {
                             new AlertDialog.Builder(Consodroid.this)
-                                .setTitle("New connection")
-                                .setMessage("Do you allow " + fileName + " access to all folders?")
+                                .setTitle(getString(R.string.new_connection))
+                                .setMessage(String.format(getString(R.string.allow_x), fileName))
                                 .setIcon(android.R.drawable.ic_dialog_alert)
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -298,7 +298,7 @@ public class Consodroid extends Activity {
     public void openAboutDialog() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_about);
-        dialog.setTitle("About ConsoDroid");
+        dialog.setTitle(getString(R.string.about_title));
         TextView textView = (TextView)dialog.findViewById(R.id.license_line_3);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
         dialog.show();
@@ -350,7 +350,7 @@ public class Consodroid extends Activity {
             try {
                 nodeProcess = Runtime.getRuntime().exec(mountedObbPath + "/node run.js prod", new String[0], new File(mountedObbPath));
                 Log.d("Consodroid", "Started node");
-                title.setText("ConsoDroid is running");
+                title.setText(getString(R.string.running));
                 if (!url.getText().equals("")) {
                     urlTitle.setVisibility(View.VISIBLE);
                     url.setVisibility(View.VISIBLE);
@@ -372,7 +372,7 @@ public class Consodroid extends Activity {
                             @Override
                             public void run() {
                                 ((Switch) view).setChecked(false);
-                                title.setText("ConsoDroid is not running");
+                                title.setText(R.string.not_running);
                                 urlTitle.setVisibility(View.INVISIBLE);
                                 url.setVisibility(View.INVISIBLE);
                                 signal.setVisibility(View.INVISIBLE);

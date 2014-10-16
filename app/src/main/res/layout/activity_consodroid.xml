@@ -13,7 +13,7 @@
         android:id="@+id/ip_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Visit:"
+        android:text="@string/visit"
         android:layout_below="@+id/consodroid_switch"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
@@ -39,7 +39,7 @@
 
     <TextView
         android:id="@+id/consodroid_switch_title"
-        android:text="ConsoDroid is not running:"
+        android:text="@string/not_running"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/consodroid_switch"
@@ -60,8 +60,6 @@
         android:layout_height="wrap_content"
         android:thumb="@drawable/custom_switch_inner"
         android:track="@drawable/custom_switch_track"
-        android:textOn="on"
-        android:textOff="off"
         android:switchTextAppearance="@style/SwitchTextAppearance"
         android:onClick="onSwitchClicked"
         android:layout_centerVertical="true"

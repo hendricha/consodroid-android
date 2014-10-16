@@ -3,5 +3,13 @@
 
     <string name="app_name">Consodroid</string>
     <string name="license_line_3">Icon is based on <a href="https://www.iconfinder.com/megavyto98">Vicent Pla\'s Simply 8-bits icons</a></string>
+    <string name="visit">Visit:</string>
+    <string name="not_running">ConsoDroid is not running</string>
+    <string name="please_wait">Please wait</string>
+    <string name="installing_assets">Installing assets ...</string>
+    <string name="new_connection">New connection</string>
+    <string name="allow_x">Do you allow %s access to all folders?</string>
+    <string name="about_title">About ConsoDroid</string>
+    <string name="running">ConsoDroid is running</string>
 
 </resources>

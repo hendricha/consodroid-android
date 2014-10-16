@@ -274,6 +274,7 @@ public class Consodroid extends Activity {
         accessControlObserver.stopWatching();
         if (nodeProcess != null) {
             nodeProcess.destroy();
+            nodeProcess = null;
         }
         unmountObb();
         super.onPause();
@@ -387,6 +388,7 @@ public class Consodroid extends Activity {
         } else {
             if (nodeProcess != null) {
                 nodeProcess.destroy();
+                nodeProcess = null;
                 Log.d("ConsoDroid", "Stopped node");
             }
         }

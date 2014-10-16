@@ -6,7 +6,7 @@
     </style>
 
     <style name="SwitchTextAppearance" parent="@android:style/TextAppearance.Holo.Small">
-        <item name="android:textColor">#000</item>
+        <item name="android:textColor">@color/base03</item>
     </style>
 
 </resources>

@@ -2,12 +2,12 @@
     <item>
         <shape>
             <gradient
-                android:startColor="#ccc"
-                android:endColor="#eee"
+                android:startColor="@color/base2"
+                android:endColor="@color/base3"
                 android:angle="270" />
             <stroke
                 android:width="0.3dp"
-                android:color="#999" />
+                android:color="@color/base2" />
             <corners
                 android:radius="1000dp" />
             <padding

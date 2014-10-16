@@ -35,6 +35,7 @@
         android:background="@drawable/url_background"
         android:visibility="invisible"
         android:textColor="@color/base03"
+        android:textIsSelectable="true"
         />
 
     <TextView

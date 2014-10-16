@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -210,7 +211,20 @@ public class Consodroid extends Activity {
             @Override
             public void run() {
                 TextView ipValue = (TextView)findViewById(R.id.ip_value);
-                ipValue.setText(IpUtil.getIdealIPAddress());
+                TextView urlTitle = (TextView)findViewById(R.id.ip_title);
+                String ipString = IpUtil.getIdealIPAddress();
+                if (ipString == "") {
+                    urlTitle.setVisibility(View.INVISIBLE);
+                    ipValue.setVisibility(View.INVISIBLE);
+                    ipValue.setText("");
+                    return;
+                }
+
+                ipValue.setText("http://" + ipString + ":3000");
+                if (nodeProcess != null) {
+                    urlTitle.setVisibility(View.VISIBLE);
+                    ipValue.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
@@ -328,12 +342,20 @@ public class Consodroid extends Activity {
     public void onSwitchClicked(final View view) {
         boolean on = ((Switch) view).isChecked();
         final TextView title = (TextView)findViewById(R.id.consodroid_switch_title);
+        final TextView urlTitle = (TextView)findViewById(R.id.ip_title);
+        final TextView url = (TextView)findViewById(R.id.ip_value);
+        final ImageView signal = (ImageView)findViewById(R.id.signal_image);
 
         if (on) {
             try {
                 nodeProcess = Runtime.getRuntime().exec(mountedObbPath + "/node run.js prod", new String[0], new File(mountedObbPath));
                 Log.d("Consodroid", "Started node");
-                title.setText("ConsoDroid is running:");
+                title.setText("ConsoDroid is running");
+                if (!url.getText().equals("")) {
+                    urlTitle.setVisibility(View.VISIBLE);
+                    url.setVisibility(View.VISIBLE);
+                }
+                signal.setVisibility(View.VISIBLE);
 
                 new Thread(new Runnable() {
                     @Override
@@ -350,7 +372,10 @@ public class Consodroid extends Activity {
                             @Override
                             public void run() {
                                 ((Switch) view).setChecked(false);
-                                title.setText("ConsoDroid is not running:");
+                                title.setText("ConsoDroid is not running");
+                                urlTitle.setVisibility(View.INVISIBLE);
+                                url.setVisibility(View.INVISIBLE);
+                                signal.setVisibility(View.INVISIBLE);
                             }
                         });
 

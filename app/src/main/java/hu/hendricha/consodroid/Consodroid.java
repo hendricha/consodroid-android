@@ -5,8 +5,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileObserver;
@@ -58,7 +60,8 @@ public class Consodroid extends Activity {
         super.onResume();
 
         Log.d("ConsoDroid", "onResume");
-        deleteAccessControlFiles();
+        deleteFiles("accessControl");
+        deleteFiles("apkInstallRequests");
 
         if (this.requiresAssetIstall()) {
             Log.d("ConsoDroid", "Assets need to be installed");
@@ -73,10 +76,11 @@ public class Consodroid extends Activity {
         updateIpAddress();
 
         createAccessControlObserver();
+        createApkInstallerRequestObserver();
     }
 
-    private void deleteAccessControlFiles() {
-        File file = new File(this.getFilesDir(), "accessControl");
+    private void deleteFiles(String dirName) {
+        File file = new File(this.getFilesDir(), dirName);
         String[] myFiles;
 
         myFiles = file.list();
@@ -84,7 +88,7 @@ public class Consodroid extends Activity {
             return;
         }
 
-        Log.d("ConsoDroid", "Removing old access control files");
+        Log.d("ConsoDroid", "Removing old " + dirName + " control files");
         for (int i=0; i<myFiles.length; i++) {
             new File(file, myFiles[i]).delete();
         }
@@ -276,6 +280,57 @@ public class Consodroid extends Activity {
             }
         };
         accessControlObserver.startWatching();
+    }
+
+    private void createApkInstallerRequestObserver() {
+        final File dir = new File(this.getFilesDir(), "apkInstallRequests");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        accessControlObserver = new FileObserver("/data/data/hu.hendricha.consodroid/files/apkInstallRequests") {
+            @Override
+            public void onEvent(int event, final String fileName) {
+                Log.d("ConsoDroid", "FileObserver event: " + fileName);
+
+                if(event == FileObserver.CREATE){
+                    Log.d("ConsoDroid", "Found new apk install request file: " + fileName);
+                    String apkFilePath = readFromFile(new File(dir, fileName));
+                    Log.d("ConsoDroid", "Requesting install of: " + apkFilePath);
+                    Intent promptInstall = new Intent(Intent.ACTION_VIEW)
+                            .setDataAndType(Uri.parse("file://" + apkFilePath), "application/vnd.android.package-archive");
+                    startActivity(promptInstall);
+                }
+            }
+        };
+        accessControlObserver.startWatching();
+    }
+
+    private String readFromFile(File file) {
+        String result = "";
+
+        try {
+            InputStream inputStream = new FileInputStream(file);
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                result = stringBuilder.toString();
+            }
+        }
+        catch (IOException e) {
+            Log.e("Exception", "Can not read file: " + e.toString());
+        }
+
+        return result;
     }
 
     @Override

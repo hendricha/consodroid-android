@@ -62,6 +62,7 @@ public class Consodroid extends Activity {
         Log.d("ConsoDroid", "onResume");
         deleteFiles("accessControl");
         deleteFiles("apkInstallRequests");
+        writeApplicationList();
 
         if (this.requiresAssetIstall()) {
             Log.d("ConsoDroid", "Assets need to be installed");
@@ -92,6 +93,10 @@ public class Consodroid extends Activity {
         for (int i=0; i<myFiles.length; i++) {
             new File(file, myFiles[i]).delete();
         }
+    }
+
+    private void writeApplicationList() {
+        PackageInfoWriter.writeInstalledApps(new File(getFilesDir(), "applicationList.json"), getPackageManager());
     }
 
     private boolean requiresAssetIstall() {

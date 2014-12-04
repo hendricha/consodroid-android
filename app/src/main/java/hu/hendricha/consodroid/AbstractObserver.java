@@ -12,10 +12,12 @@ public abstract class AbstractObserver {
     protected final Activity activity;
     private FileObserver fileObserver;
     protected final String folderName;
+    protected int eventType;
 
-    public AbstractObserver(Activity activity, String folderName) {
+    public AbstractObserver(Activity activity, String folderName, int event) {
         this.activity = activity;
         this.folderName = folderName;
+        this.eventType = event;
         this.observe();
     }
 
@@ -30,9 +32,9 @@ public abstract class AbstractObserver {
             public void onEvent(int event, final String fileName) {
                 Log.d("ConsoDroid", "FileObserver event: " + fileName);
 
-                if (event == FileObserver.CREATE) {
-                    Log.d("ConsoDroid", "Found new observed file: " + fileName);
-                    manageCreateEvent(dir, fileName);
+                if (event == eventType) {
+                    Log.d("ConsoDroid", "Observed event in file: " + folderName + '/' + fileName);
+                    manageEvent(dir, fileName);
                 }
             }
         };
@@ -44,5 +46,5 @@ public abstract class AbstractObserver {
         fileObserver.stopWatching();
     }
 
-    abstract protected void manageCreateEvent(final File dir, final String fileName);
+    abstract protected void manageEvent(final File dir, final String fileName);
 }

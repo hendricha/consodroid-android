@@ -3,6 +3,7 @@ package hu.hendricha.consodroid;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.FileObserver;
 import android.util.Log;
 
 import java.io.File;
@@ -12,10 +13,10 @@ import java.io.OutputStreamWriter;
 
 public class AccessControlObserver extends AbstractObserver {
     public AccessControlObserver(Activity activity) {
-        super(activity, "accessControl");
+        super(activity, "accessControl", FileObserver.CREATE);
     }
 
-    protected void manageCreateEvent(final File dir, final String fileName) {
+    protected void manageEvent(final File dir, final String fileName) {
         activity.runOnUiThread(new Runnable() {
             public void run() {
                 new AlertDialog.Builder(activity)

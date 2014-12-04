@@ -43,6 +43,7 @@ public class Consodroid extends Activity {
         }
     };
     private String obbPathOnExternalStorage = "/Android/obb/hu.hendricha.consodroid";
+    private boolean setupFinished = false;
 
 
     @Override
@@ -66,12 +67,19 @@ public class Consodroid extends Activity {
             mountObb();
         }
 
+        if (setupFinished) {
+            Log.d("ConsoDroid", "node.js is already running, don't doing first resume stuff");
+            return;
+        }
+
         createPublicFolder();
         createNetworkChangeReciever();
         updateIpAddress();
 
         accessControlObserver = new AccessControlObserver(this);
         applicationInstallRequestObserver = new ApplicationInstallRequestObserver(this);
+
+        setupFinished = true;
     }
 
     private void writeApplicationList() {
@@ -224,19 +232,6 @@ public class Consodroid extends Activity {
                 }
             }
         });
-    }
-
-    @Override
-    protected void onPause() {
-        accessControlObserver.stopObserving();
-        applicationInstallRequestObserver.stopObserving();
-
-        if (nodeProcess != null) {
-            nodeProcess.destroy();
-            nodeProcess = null;
-        }
-        unmountObb();
-        super.onPause();
     }
 
     @Override

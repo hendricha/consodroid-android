@@ -2,7 +2,6 @@ package hu.hendricha.consodroid;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
 
@@ -12,10 +11,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 public class AccessControlObserver extends AbstractObserver {
-    protected String folderName = "accessControl";
-
     public AccessControlObserver(Activity activity) {
-        super(activity);
+        super(activity, "accessControl");
     }
 
     protected void manageCreateEvent(final File dir, final String fileName) {

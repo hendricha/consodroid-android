@@ -13,10 +13,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class ApplicationInstallRequestObserver extends AbstractObserver {
-    protected String folderName = "apkInstallRequests";
-
     public ApplicationInstallRequestObserver(Activity activity) {
-        super(activity);
+        super(activity, "apkInstallRequests");
     }
 
     @Override

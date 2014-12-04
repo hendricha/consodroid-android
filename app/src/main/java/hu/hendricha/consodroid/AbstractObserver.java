@@ -1,16 +1,9 @@
 package hu.hendricha.consodroid;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.os.FileObserver;
 import android.util.Log;
-
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 /**
  * Created by cruelangel on 2014.12.04..
@@ -18,10 +11,11 @@ import java.io.OutputStreamWriter;
 public abstract class AbstractObserver {
     protected final Activity activity;
     private FileObserver fileObserver;
-    protected String folderName;
+    protected final String folderName;
 
-    public AbstractObserver(Activity activity) {
+    public AbstractObserver(Activity activity, String folderName) {
         this.activity = activity;
+        this.folderName = folderName;
         this.observe();
     }
 

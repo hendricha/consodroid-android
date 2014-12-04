@@ -25,6 +25,8 @@ public abstract class AbstractObserver {
         final File dir = new File(activity.getFilesDir(), folderName);
         if (!dir.exists()) {
             dir.mkdirs();
+        } else {
+            deleteFiles();
         }
 
         fileObserver = new FileObserver("/data/data/hu.hendricha.consodroid/files/" + folderName) {
@@ -47,4 +49,19 @@ public abstract class AbstractObserver {
     }
 
     abstract protected void manageEvent(final File dir, final String fileName);
+
+    private void deleteFiles() {
+        File file = new File(activity.getFilesDir(), folderName);
+        String[] myFiles;
+
+        myFiles = file.list();
+        if (myFiles == null) {
+            return;
+        }
+
+        Log.d("ConsoDroid", "Removing old " + folderName + " control files");
+        for (int i=0; i<myFiles.length; i++) {
+            new File(file, myFiles[i]).delete();
+        }
+    }
 }

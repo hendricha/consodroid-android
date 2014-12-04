@@ -56,8 +56,6 @@ public class Consodroid extends Activity {
         super.onResume();
 
         Log.d("ConsoDroid", "onResume");
-        deleteFiles("accessControl");
-        deleteFiles("apkInstallRequests");
         writeApplicationList();
 
         if (this.requiresAssetIstall()) {
@@ -74,22 +72,6 @@ public class Consodroid extends Activity {
 
         accessControlObserver = new AccessControlObserver(this);
         applicationInstallRequestObserver = new ApplicationInstallRequestObserver(this);
-
-    }
-
-    private void deleteFiles(String dirName) {
-        File file = new File(this.getFilesDir(), dirName);
-        String[] myFiles;
-
-        myFiles = file.list();
-        if (myFiles == null) {
-            return;
-        }
-
-        Log.d("ConsoDroid", "Removing old " + dirName + " control files");
-        for (int i=0; i<myFiles.length; i++) {
-            new File(file, myFiles[i]).delete();
-        }
     }
 
     private void writeApplicationList() {

@@ -1,17 +1,12 @@
 package hu.hendricha.consodroid;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.FileObserver;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageManager;
 import android.text.method.LinkMovementMethod;
@@ -31,12 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 
 public class Consodroid extends Activity {
 
     private Process nodeProcess;
-    private FileObserver accessControlObserver;
+    private AccessControlObserver accessControlObserver;
+    private ApplicationInstallRequestObserver applicationInstallRequestObserver;
     private ProgressDialog ringProgressDialog = null;
     private int assetNumber = 0;
     private String mountedObbPath = "";
@@ -48,6 +43,7 @@ public class Consodroid extends Activity {
         }
     };
     private String obbPathOnExternalStorage = "/Android/obb/hu.hendricha.consodroid";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +72,9 @@ public class Consodroid extends Activity {
         createNetworkChangeReciever();
         updateIpAddress();
 
-        createAccessControlObserver();
-        createApkInstallerRequestObserver();
+        accessControlObserver = new AccessControlObserver(this);
+        applicationInstallRequestObserver = new ApplicationInstallRequestObserver(this);
+
     }
 
     private void deleteFiles(String dirName) {
@@ -247,100 +244,11 @@ public class Consodroid extends Activity {
         });
     }
 
-    private void createAccessControlObserver() {
-        final File dir = new File(this.getFilesDir(), "accessControl");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        accessControlObserver = new FileObserver("/data/data/hu.hendricha.consodroid/files/accessControl") {
-            @Override
-            public void onEvent(int event, final String fileName) {
-                Log.d("ConsoDroid", "FileObserver event: " + fileName);
-
-                if(event == FileObserver.CREATE){
-                    Log.d("ConsoDroid", "Found new access control file: " + fileName);
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            new AlertDialog.Builder(Consodroid.this)
-                                .setTitle(getString(R.string.new_connection))
-                                .setMessage(String.format(getString(R.string.allow_x), fileName))
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        try {
-                                            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(new File(dir, fileName)));
-                                            outputStreamWriter.write("true");
-                                            outputStreamWriter.close();
-                                            Log.d("ConsoDroid", "Gave access to: " + fileName);
-                                        }
-                                        catch (IOException e) {
-                                            Log.e("Exception", "File write failed: " + e.toString());
-                                        }
-                                    }})
-                                .setNegativeButton(android.R.string.no, null).show();
-                        }
-                    });
-                }
-            }
-        };
-        accessControlObserver.startWatching();
-    }
-
-    private void createApkInstallerRequestObserver() {
-        final File dir = new File(this.getFilesDir(), "apkInstallRequests");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        accessControlObserver = new FileObserver("/data/data/hu.hendricha.consodroid/files/apkInstallRequests") {
-            @Override
-            public void onEvent(int event, final String fileName) {
-                Log.d("ConsoDroid", "FileObserver event: " + fileName);
-
-                if(event == FileObserver.CREATE){
-                    Log.d("ConsoDroid", "Found new apk install request file: " + fileName);
-                    String apkFilePath = readFromFile(new File(dir, fileName));
-                    Log.d("ConsoDroid", "Requesting install of: " + apkFilePath);
-                    Intent promptInstall = new Intent(Intent.ACTION_VIEW)
-                            .setDataAndType(Uri.parse("file://" + apkFilePath), "application/vnd.android.package-archive");
-                    startActivity(promptInstall);
-                }
-            }
-        };
-        accessControlObserver.startWatching();
-    }
-
-    private String readFromFile(File file) {
-        String result = "";
-
-        try {
-            InputStream inputStream = new FileInputStream(file);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                result = stringBuilder.toString();
-            }
-        }
-        catch (IOException e) {
-            Log.e("Exception", "Can not read file: " + e.toString());
-        }
-
-        return result;
-    }
-
     @Override
     protected void onPause() {
-        accessControlObserver.stopWatching();
+        accessControlObserver.stopObserving();
+        applicationInstallRequestObserver.stopObserving();
+
         if (nodeProcess != null) {
             nodeProcess.destroy();
             nodeProcess = null;

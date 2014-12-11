@@ -225,7 +225,7 @@ public class Consodroid extends Activity {
                     return;
                 }
 
-                ipValue.setText("http://" + ipString + ":3000");
+                ipValue.setText("https://" + ipString + ":3000");
                 if (nodeProcess != null) {
                     urlTitle.setVisibility(View.VISIBLE);
                     ipValue.setVisibility(View.VISIBLE);

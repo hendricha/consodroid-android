@@ -57,7 +57,7 @@ public class Consodroid extends Activity {
         super.onResume();
 
         Log.d("ConsoDroid", "onResume");
-        writeApplicationList();
+        writeApplicationListAndDeviceInfo();
 
         if (this.requiresAssetIstall()) {
             Log.d("ConsoDroid", "Assets need to be installed");
@@ -82,8 +82,9 @@ public class Consodroid extends Activity {
         setupFinished = true;
     }
 
-    private void writeApplicationList() {
+    private void writeApplicationListAndDeviceInfo() {
         PackageInfoWriter.writeInstalledApps(new File(getFilesDir(), "applicationList.json"), getPackageManager());
+        DeviceInfoWriter.writeDeviceInfo(new File(getFilesDir(), "deviceInfo.json"), this);
     }
 
     private boolean requiresAssetIstall() {

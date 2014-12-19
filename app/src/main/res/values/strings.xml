@@ -13,5 +13,6 @@
     <string name="running">ConsoDroid is running</string>
     <string name="license_line">Created by Hendrich Attila at agmen.hu\nConsoDroid is licensed under MIT license\nConsoloid is licensed under MIT license\nNode.js is licensed under MIT license\nMobile and Wifi icon from FontAwesome pack, licensed under MIT license</string>
     <string name="about_subtitle">Browse and share your files through HTTP</string>
+    <string name="waiting">Waiting...</string>
 
 </resources>

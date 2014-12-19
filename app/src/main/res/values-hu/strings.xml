@@ -11,5 +11,6 @@
     <string name="license_line">Készítette Hendrich Attila az agmen.hu-nál\nConsoDroid licensze: MIT licensz\nConsoloid licensze: MIT licensz\nNode.js licensze: MIT licensz\Mobil és Wifi ikon a FontAwesome csomgaból, MIT licensz</string>
     <string name="license_line_icon">Ikon forrása: <a href="https://www.iconfinder.com/megavyto98">Vicent Pla\'s Simply 8-bits icons</a></string>
     <string name="about_subtitle">Böngéssze és ossza meg fájljait HTTP-n keresztül</string>
+    <string name="waiting">Várakozás...</string>
 
 </resources>

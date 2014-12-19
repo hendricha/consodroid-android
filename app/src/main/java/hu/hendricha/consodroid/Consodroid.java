@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.Socket;
 
 public class Consodroid extends Activity {
 
@@ -306,12 +307,7 @@ public class Consodroid extends Activity {
             try {
                 nodeProcess = Runtime.getRuntime().exec(mountedObbPath + "/node run.js prod", new String[0], new File(mountedObbPath));
                 Log.d("Consodroid", "Started node");
-                title.setText(getString(R.string.running));
-                if (!url.getText().equals("")) {
-                    urlTitle.setVisibility(View.VISIBLE);
-                    url.setVisibility(View.VISIBLE);
-                }
-                signal.setVisibility(View.VISIBLE);
+                title.setText(getString(R.string.waiting));
 
                 new Thread(new Runnable() {
                     @Override
@@ -336,6 +332,45 @@ public class Consodroid extends Activity {
                         });
 
                     }
+                }).start();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("Consodroid", "Waiting for node to start http on a seperate thread");
+
+                        while (!attemptConnection()) {
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        };
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                signal.setVisibility(View.VISIBLE);
+                                title.setText(getString(R.string.running));
+                                if (!url.getText().equals("")) {
+                                    urlTitle.setVisibility(View.VISIBLE);
+                                    url.setVisibility(View.VISIBLE);
+                                }
+                            }
+                        });
+                    }
+
+                    public boolean attemptConnection() {
+                        try {
+                            Socket socket = new Socket("localhost", 3000);
+                            socket.close();
+                        } catch (IOException e) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+
                 }).start();
             } catch (IOException e) {
                 throw new RuntimeException(e);

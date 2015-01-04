@@ -36,6 +36,8 @@ public class Consodroid extends Activity {
     private ProgressDialog ringProgressDialog = null;
     private int assetNumber = 0;
     private String mountedObbPath = "";
+    private NetworkStateReceiver receiver = null;
+    IntentFilter intent = null;
     private OnObbStateChangeListener obbStateChangeListener = new OnObbStateChangeListener() {
         @Override
         public void onObbStateChange(final String path, int state) {
@@ -54,6 +56,12 @@ public class Consodroid extends Activity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -69,7 +77,8 @@ public class Consodroid extends Activity {
         }
 
         if (setupFinished) {
-            Log.d("ConsoDroid", "node.js is already running, don't doing first resume stuff");
+            Log.d("ConsoDroid", "node.js is already running, don't do first resume stuff");
+            registerReceiver(receiver, intent);
             return;
         }
 
@@ -206,10 +215,9 @@ public class Consodroid extends Activity {
 
     private void createNetworkChangeReciever() {
         Log.d("ConsoDroid", "Registering network change reciver");
-        NetworkStateReceiver receiver = null;
         receiver = new NetworkStateReceiver();
         receiver.setMainActivityHandler(this);
-        IntentFilter intent = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+        intent = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
         registerReceiver(receiver, intent);
     }
 

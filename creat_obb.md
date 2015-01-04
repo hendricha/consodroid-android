@@ -1,7 +1,7 @@
 Creating the .obb file
 ======================
 
-The *creatobb.sh* is the shell script used for creating the .obb file which will contain all the necessary stuff for running the ConsoDroid Consoloid application from your mobile device.
+The *creat_obb.sh* is the shell script used for creating the .obb file which will contain all the necessary stuff for running the ConsoDroid Consoloid application from your mobile device.
 
 Since it is a bash script file, it requires *bash*, and a *POSIX* like environment. The script was only tested on a *64 bit Linux system* (namely an *Ubuntu 14.04* derivative distro), however it should probably work on OS X too. (And you might even be able to run it in *CYGWIN* if you are lucky enough.)
 

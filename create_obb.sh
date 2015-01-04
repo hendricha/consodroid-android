@@ -12,7 +12,7 @@ CONSODROIDREPOSITORY="https://github.com/hendricha/consoloid-consodroid.git"
 CONSODROIDMOCKREPOSITORY="https://github.com/hendricha/consoloid-consodroid-mock.git"
 
 if [[ "$1" == "--help" ]]; then
-  cat creatobb.md
+  cat creat_obb.md
   exit
 fi
 
